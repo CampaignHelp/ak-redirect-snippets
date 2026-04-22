@@ -1,0 +1,5 @@
+{% if action.created_user %}
+https://yourorg.actionkit.com/welcome/welcome-new-supporter/
+{% else %}
+https://yourorg.actionkit.com/donate/thanks-and-donate/
+{% endif %}

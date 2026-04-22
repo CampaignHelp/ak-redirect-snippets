@@ -1,0 +1,5 @@
+{% if user.custom_fields.is_monthly_donor != "true" %}
+https://yourorg.actionkit.com/donate/go-monthly/?monthly_amounts=5,10,15,20,25,30
+{% else %}
+https://yourorg.actionkit.com/donate/thanks/
+{% endif %}

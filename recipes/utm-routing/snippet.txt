@@ -1,0 +1,7 @@
+{% if args.src == "facebook" %}
+https://yourorg.actionkit.com/thanks/share-facebook/
+{% elif args.src == "email" %}
+https://yourorg.actionkit.com/donate/donate/
+{% else %}
+https://yourorg.actionkit.com/thanks/default/
+{% endif %}

@@ -1,0 +1,5 @@
+{% if some_condition %}
+https://yourorg.actionkit.com/path/to/page-a/
+{% else %}
+https://yourorg.actionkit.com/path/to/fallback/
+{% endif %}

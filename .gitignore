@@ -1,0 +1,6 @@
+tests/.venv/
+tests/.state.json
+tests/results-*.md
+__pycache__/
+*.pyc
+.DS_Store
