@@ -41,7 +41,7 @@ Available inside the Redirect URL field:
 | `{{ user.custom_fields.* }}` | Any custom user field (e.g. `user.custom_fields.donation_count_2026`) |
 | `{{ action.* }}` | Properties of the current action (e.g. `action.created_user` → `True`/`False`) |
 | `{{ args.* }}` | URL parameters the user arrived with (e.g. `args.utm_campaign`, `args.src`) |
-| `|filter:arg` | Django template filters — e.g. `|multiply:0.5`, `|default:"0"` |
+| `{{ value&#124;filter:arg }}` | Django template filters — e.g. `{{ user.highest_previous_contribution&#124;multiply:0.5 }}`, `{{ user.custom_fields.foo&#124;default:"0" }}` |
 
 For the full filter list supported in your instance, see ActionKit's Custom Tags documentation.
 
