@@ -28,7 +28,7 @@ This repo exists to spread what Shannon taught to a wider audience. Every recipe
 3. Copy the contents of `snippet.txt`.
 4. In ActionKit: open the page you want to customize → **After-action info** tab → paste into **Redirect URL**.
 5. Replace `yourorg.actionkit.com` with your actual AK subdomain. Replace the example page slugs with yours.
-6. **Test it.** Preview the page as at least three users: one new user, one returning user with the relevant variables set, and one missing those variables (to confirm the fallback works).
+6. **Test it.** AK has no page-preview mode for redirect URLs — the only way to verify branching is to actually submit the page as different users. Create (or reuse) at least three test accounts: one that triggers the `{% if %}` branch, one for any `{% elif %}`, and one where no branch matches so the `{% else %}` fallback fires. For each, submit the form and confirm the landing URL is what you expect. The `tests/` folder in this repo shows one way to automate this against a test instance.
 
 ## Syntax reference
 
@@ -61,7 +61,8 @@ For the full filter list supported in your instance, see ActionKit's Custom Tags
 ## Warnings
 
 - **Always provide a fallback.** Every conditional needs an `{% else %}` branch with a safe default URL. A missing redirect breaks the user's experience.
-- **Test as different users.** AK's page preview lets you simulate other users. Use it.
+- **Test by actually submitting.** AK evaluates the redirect URL template at action-submission time, and there's no preview for it — the only way to verify a branch fires is to submit the form as a user in that state. See step 6 in "How to use a recipe" above.
+- **Unresolvable paths silently fall back.** If the rendered redirect URL points to a path that 404s on your AK subdomain, AK quietly routes the user to the page's default thank-you URL instead. Make sure every URL a branch might produce actually exists before going live.
 - **Mind the quote escaping.** The Redirect URL field accepts the snippet as plain text — don't wrap it in extra quotes.
 - **Guard custom field references.** If a custom field is missing on some users, use `|default:"0"` or an explicit `{% if user.custom_fields.foo %}` check before comparing it.
 - **Some features are Payments-only.** The donation URL parameters (`amounts=`, etc.) only work on NGP VAN Payments-enabled donation pages.
