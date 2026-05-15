@@ -1,0 +1,5 @@
+{% if user|actiontaken:PRIOR_PAGE_ID %}
+https://yourorg.actionkit.com/donate/donate/
+{% else %}
+https://yourorg.actionkit.com/call/call-your-rep/
+{% endif %}

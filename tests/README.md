@@ -44,7 +44,7 @@ python3 cleanup.py    # resets followup.url to the placeholder
 
 ## What the tests cover
 
-Nine cases across four recipes:
+Eleven cases across five recipes:
 
 | Recipe | Cases |
 |---|---|
@@ -52,6 +52,7 @@ Nine cases across four recipes:
 | `ladder-from-prior-gift` | low count (else-branch) · no prior gift (else-branch) |
 | `monthly-upgrade` | not monthly (if-branch) · is monthly (else-branch) |
 | `utm-routing` | `?src=facebook` (if) · `?src=email` (elif) · no src (else) |
+| `escalation-ladder` | fresh user / unrelated page id (else-branch) · returning user / page they already touched (if-branch) |
 
 **Skipped:** the ladder recipe's populated-amounts case requires a user with real donation history (`user.highest_previous_contribution` is AK-computed from orders, not PATCHable via REST). Its branch syntax is identical to the tested fallback.
 

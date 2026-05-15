@@ -105,6 +105,25 @@ def ensure_page_settings(page):
     print(f"[page] patched → {patches}")
 
 
+def find_reference_page(test_page_id):
+    """Find any signup page on Robotic Dogs that ISN'T the test page.
+
+    The escalation-ladder recipe checks `user|actiontaken:PAGE_ID` against a
+    page the test user has never submitted, so we need a second known page
+    id to point at. Any other live signup page works — fresh test users
+    (one-time email per run) have no action history anywhere on RD.
+    """
+    data = ak_request("GET", "/rest/v1/signuppage/?limit=20&format=json")
+    for obj in data.get("objects", []):
+        if obj.get("id") != test_page_id and obj.get("name") != PAGE_NAME:
+            print(f"[ref-page] using → id={obj['id']} name={obj['name']!r}")
+            return obj
+    sys.exit(
+        "FATAL: no other signup page found on Robotic Dogs — escalation-ladder "
+        "test needs a second page id to check actiontaken against."
+    )
+
+
 def reset_followup(page):
     followup = page.get("followup") or {}
     followup_uri = followup.get("resource_uri")
@@ -141,6 +160,8 @@ def main():
     # Re-fetch page so state reflects the list swap
     page = ak_request("GET", f"{page['resource_uri']}?format=json")
 
+    ref_page = find_reference_page(page["id"])
+
     state = {
         "list_uri": list_obj["resource_uri"],
         "list_id": list_obj["id"],
@@ -149,6 +170,8 @@ def main():
         "page_name": page["name"],
         "followup_uri": followup_uri,
         "public_url": f"https://roboticdogs.actionkit.com/signup/{page['name']}/",
+        "reference_page_id": ref_page["id"],
+        "reference_page_name": ref_page["name"],
     }
     STATE_FILE.write_text(json.dumps(state, indent=2) + "\n")
     print()

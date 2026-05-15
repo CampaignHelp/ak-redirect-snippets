@@ -42,6 +42,8 @@ Available inside the Redirect URL field:
 | `{{ action.* }}` | Properties of the current action (e.g. `action.created_user` → `True`/`False`) |
 | `{{ args.* }}` | URL parameters the user arrived with (e.g. `args.utm_campaign`, `args.src`) |
 | `{{ value&#124;filter:arg }}` | Django template filters — e.g. `{{ user.highest_previous_contribution&#124;multiply:0.5 }}`, `{{ user.custom_fields.foo&#124;default:"0" }}` |
+| `{{ user&#124;actiontaken:PAGE_ID }}` | Returns `1` if the user has any prior action on the given page id, `0` otherwise. Native AK filter — works without custom-field setup. |
+| `{{ user&#124;tagged:"tag-name" }}` | Returns `1` if the user has taken action on any page carrying that tag, `0` otherwise. |
 
 For the full filter list supported in your instance, see ActionKit's Custom Tags documentation.
 
@@ -53,6 +55,7 @@ For the full filter list supported in your instance, see ActionKit's Custom Tags
 | [`recipes/ladder-from-prior-gift`](recipes/ladder-from-prior-gift) | Build a donation ladder from a user's highest previous contribution. *(Shannon's flagship example.)* |
 | [`recipes/monthly-upgrade`](recipes/monthly-upgrade) | Send one-time donors to a monthly-giving upgrade page. |
 | [`recipes/utm-routing`](recipes/utm-routing) | Send users arriving from different campaigns to different follow-up pages. |
+| [`recipes/escalation-ladder`](recipes/escalation-ladder) | Route signers to the next step based on whether they've already taken a specific prior action — e.g. petition signers who haven't called yet → call page, signers who already called → donate page. |
 
 ## Reference
 

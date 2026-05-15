@@ -95,7 +95,27 @@ TEST_SNIPPETS = {
         f"{TEST_URL}?branch=else_default"
         "{% endif %}"
     ),
+    # escalation-ladder snippets are rendered per-case because they need
+    # the live page id (reference page for case a, test page for case b)
+    # interpolated from .state.json at run time.
+    "escalation-ladder": None,
 }
+
+
+def render_escalation_snippet(page_id):
+    """Build the escalation-ladder test snippet against a specific page id.
+
+    The recipe ships with `PRIOR_PAGE_ID` as a placeholder; for tests we
+    substitute the real id from .state.json so the runner can prove both
+    branches against different page-history states.
+    """
+    return (
+        "{% if user|actiontaken:" + str(page_id) + " %}"
+        f"{TEST_URL}?branch=if_prior_action"
+        "{% else %}"
+        f"{TEST_URL}?branch=else_no_prior_action"
+        "{% endif %}"
+    )
 
 
 # ---------- test matrix ----------
@@ -157,6 +177,30 @@ CASES = [
         "fields": {"is_monthly_donor": "true"},
         "expect_regex": r"branch=else_already_monthly",
     },
+    # escalation-ladder (uses native AK filter `user|actiontaken:PAGE_ID`)
+    # Case a: fresh user submits ch-redirect-test1; snippet checks against
+    # the reference page (which this user has never touched) → else-branch.
+    # Case b: SAME email submits ch-redirect-test1 a second time; snippet
+    # checks against ch-redirect-test1 itself (where case-a created an
+    # action) → if-branch.
+    {
+        "recipe": "escalation-ladder",
+        "case": "a-no-prior-action",
+        "description": "fresh user, snippet checks reference page (no history) → else-branch",
+        "email_case": "escalation-a",
+        "prep": "fresh",
+        "snippet_page_id": "reference_page_id",
+        "expect_regex": r"branch=else_no_prior_action",
+    },
+    {
+        "recipe": "escalation-ladder",
+        "case": "b-has-prior-action",
+        "description": "same email returning, snippet checks test page (case-a left an action) → if-branch",
+        "email_case": "escalation-a",  # reuse case-a email
+        "prep": "existing",
+        "snippet_page_id": "page_id",
+        "expect_regex": r"branch=if_prior_action",
+    },
     # utm-routing
     {
         "recipe": "utm-routing",
@@ -208,18 +252,31 @@ def load_state():
     return json.loads(STATE_FILE.read_text())
 
 
-def load_snippet(recipe_folder):
+def load_snippet(recipe_folder, case=None, state=None):
     """Return the test-variant of the recipe snippet.
 
     Verifies the shipped recipe exists + has matching logic structure,
     but installs the test-safe version (branch markers, RD-valid URLs)
     to sidestep AK's URL-validity fallback.
+
+    For escalation-ladder, the snippet is rendered per-case using a page
+    id from `state` (resolved via case["snippet_page_id"], e.g. "page_id"
+    or "reference_page_id").
     """
     shipped = (RECIPES_DIR / recipe_folder / "snippet.txt").read_text().strip()
     if not shipped:
         sys.exit(f"FATAL: recipe {recipe_folder} has empty snippet.txt")
     if recipe_folder not in TEST_SNIPPETS:
         sys.exit(f"FATAL: no test snippet defined for {recipe_folder}")
+
+    if recipe_folder == "escalation-ladder":
+        if not case or not state:
+            sys.exit("FATAL: escalation-ladder needs case + state to render snippet")
+        key = case.get("snippet_page_id")
+        if key not in state:
+            sys.exit(f"FATAL: escalation-ladder case missing state key {key!r}")
+        return render_escalation_snippet(state[key])
+
     return TEST_SNIPPETS[recipe_folder]
 
 
@@ -312,7 +369,7 @@ def run_case(case, state, browser_page, *, dry_run):
     # AK appears to cache followup.url briefly — submitting right after a
     # PATCH sometimes hits the stale cached value, so we verify via GET
     # and add a generous propagation delay.
-    snippet = load_snippet(recipe)
+    snippet = load_snippet(recipe, case=case, state=state)
     install_snippet(state["followup_uri"], snippet)
     time.sleep(2.0)
     stored = ak_request("GET", f"{state['followup_uri']}?format=json")
