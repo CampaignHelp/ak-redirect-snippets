@@ -15,7 +15,7 @@ Your recipe must:
 
 ## Folder layout
 
-Copy `recipes/_TEMPLATE/` to `recipes/your-recipe-name/` and fill in the four files:
+Copy `recipes/_TEMPLATE/` to `recipes/your-recipe-name/` and fill in the three files:
 
 - `README.md` — full teaching doc, written for an AK admin who has never seen Django template syntax
 - `snippet.txt` — the actual copy-paste content
