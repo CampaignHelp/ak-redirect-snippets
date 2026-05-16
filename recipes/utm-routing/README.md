@@ -171,4 +171,10 @@ See the top-level `MEASUREMENT.md` for the branch-tagging convention used across
 
 ## Tested on
 
-Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22 — all three branches (`if`/`elif`/`else`) pass via the automated Playwright matrix in `tests/`. Users arriving at `/signup/<your-page>/?src=<value>` have `{{ args.src }}` automatically available in the redirect URL template — no hidden form inputs needed.
+History: tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22 and again on 2026-05-15 — all three branches (`if`/`elif`/`else`) passed via the automated Playwright matrix in `tests/`.
+
+**Current status (2026-05-16): partial regression.** A fresh run of the same matrix has the `{% else %}` branch passing but both explicit branches (`?src=facebook` → `if`, `?src=email` → `elif`) falling through to `{% else %}` instead. The most likely cause is something on the Robotic Dogs side — either the test page (`ch-redirect-test1`) lost its hidden source-capturing field, or AK changed how `args.*` is preserved between page load and action submission on that instance.
+
+If you install this recipe today, test it on **your** AK instance before relying on it. Submit a real form with `?src=facebook` in the URL and confirm the landing URL is the Facebook branch, not the default. If you observe the same fallthrough, check your AK page's hidden form fields — the source parameter has to be carried from the GET URL into the POST submission for `args.src` to be available in the redirect template.
+
+Run `tests/results-2026-05-16.md` documents the current state. The regression is being investigated; this README will be updated once root cause is identified.
