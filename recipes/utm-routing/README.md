@@ -159,6 +159,8 @@ https://yourorg.actionkit.com/thanks/default/?utm_source=ak-redirect&utm_campaig
 {% endif %}
 ```
 
+A clean copy of the tagged snippet lives in `snippet-tagged.txt` next to this README.
+
 What to compare:
 
 - **Engagement on the tailored branches vs. a control.** If you've previously sent everyone to the default thank-you, your historical conversion from that page is the baseline. Tailored branches should match or beat it.

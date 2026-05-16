@@ -190,6 +190,8 @@ https://yourorg.actionkit.com/call/call-your-rep/?utm_source=ak-redirect&utm_cam
 {% endif %}
 ```
 
+A clean copy of the tagged snippet lives in `snippet-tagged.txt` next to this README.
+
 What to compare:
 
 - **Call-completion rate** on the `escalate-to-call` branch (actions recorded on the call page / supporters sent there). Compare to a control campaign that sends *every* signer to the call page without escalation. If escalated supporters complete the call at a similar or higher rate, the ladder is doing real work — you're not just filtering for the people who were already going to call.
@@ -202,7 +204,7 @@ See the top-level `MEASUREMENT.md` for the branch-tagging convention used across
 
 ## Tested on
 
-Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-05-15. Both branches pass via the automated Playwright matrix in `tests/`:
+Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-05-15 and 2026-05-16. Both branches pass via the automated Playwright matrix in `tests/`:
 
 - A fresh user submitting against an unrelated page ID → `{% else %}` branch (no prior action).
 - A returning user submitting again, with the snippet checking the page they previously submitted → `{% if %}` branch (prior action recorded).

@@ -1,0 +1,5 @@
+{% if action.created_user %}
+https://yourorg.actionkit.com/welcome/welcome-new-supporter/?utm_source=ak-redirect&utm_campaign=new-vs-returning&utm_content=new
+{% else %}
+https://yourorg.actionkit.com/donate/thanks-and-donate/?utm_source=ak-redirect&utm_campaign=new-vs-returning&utm_content=returning
+{% endif %}

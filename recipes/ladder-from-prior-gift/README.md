@@ -191,6 +191,8 @@ https://yourorg.actionkit.com/donate/donate/?monthly_amounts=5,10,15,20,25,30&ut
 {% endif %}
 ```
 
+A clean copy of the tagged snippet lives in `snippet-tagged.txt` next to this README.
+
 The two branches now carry distinct `utm_content` values (`ladder` vs `entry`). AK stores the full landing URL on each donation record, so you can:
 
 - **In AK donation reports** — filter or group by `utm_content` to compare average gift, conversion rate, and total raised across branches.
@@ -209,4 +211,4 @@ See the top-level `MEASUREMENT.md` for the branch-tagging convention used across
 
 ## Tested on
 
-Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22. The `{% else %}` branch (sub-threshold and never-donor cases) passes via the automated Playwright matrix in `tests/`. The laddered branch requires a user with real donation history, which can't be planted via REST; its branch logic is syntactically identical to the fallback and has been visually verified.
+Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22, 2026-05-15, and 2026-05-16. The `{% else %}` branch (sub-threshold and never-donor cases) passes via the automated Playwright matrix in `tests/`. The laddered branch requires a user with real donation history, which can't be planted via REST; its branch logic is syntactically identical to the fallback and has been visually verified.

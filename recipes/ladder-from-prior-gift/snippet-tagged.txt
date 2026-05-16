@@ -1,0 +1,5 @@
+{% if user.custom_fields.donation_count_2026 > 3 %}
+https://yourorg.actionkit.com/donate/donate/?amounts={{ user.highest_previous_contribution|multiply:0.5 }},{{ user.highest_previous_contribution|multiply:0.75 }},{{ user.highest_previous_contribution|multiply:1 }},{{ user.highest_previous_contribution|multiply:1.25 }},{{ user.highest_previous_contribution|multiply:1.5 }}&utm_source=ak-redirect&utm_campaign=ladder-from-prior-gift&utm_content=ladder
+{% else %}
+https://yourorg.actionkit.com/donate/donate/?monthly_amounts=5,10,15,20,25,30&utm_source=ak-redirect&utm_campaign=ladder-from-prior-gift&utm_content=entry
+{% endif %}

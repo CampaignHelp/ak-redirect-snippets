@@ -1,0 +1,5 @@
+{% if some_condition %}
+https://yourorg.actionkit.com/path/to/page-a/?utm_source=ak-redirect&utm_campaign=recipe-name&utm_content=branch-a
+{% else %}
+https://yourorg.actionkit.com/path/to/fallback/?utm_source=ak-redirect&utm_campaign=recipe-name&utm_content=branch-b
+{% endif %}

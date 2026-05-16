@@ -12,6 +12,20 @@ ActionKit lets you embed Django-style template logic inside a page's **After-act
 
 The syntax works well. Most AK admins don't know it exists — and when they do, it's hard to find tested examples. This repo fixes that.
 
+## Quick example
+
+Want first-time supporters to land on a welcome page, and returning supporters to land on a donation ask? Paste this into your AK page's **After-action info → Redirect URL** field:
+
+```django
+{% if action.created_user %}
+https://yourorg.actionkit.com/welcome/welcome-new-supporter/
+{% else %}
+https://yourorg.actionkit.com/donate/thanks-and-donate/
+{% endif %}
+```
+
+That's the [`new-vs-returning`](recipes/new-vs-returning) recipe. The rest of the repo is more of the same: short, tested snippets you copy in, edit two slugs, and ship.
+
 ## Credit
 
 The feature and this repo's flagship example come from **Shannon Turner**, who demoed *Snippets in redirect URLs* at ActionKit ClientCon 2026 (feature #9 of her *10 Features Every Client Should Use* talk).
@@ -41,9 +55,9 @@ Available inside the Redirect URL field:
 | `{{ user.custom_fields.* }}` | Any custom user field (e.g. `user.custom_fields.donation_count_2026`) |
 | `{{ action.* }}` | Properties of the current action (e.g. `action.created_user` → `True`/`False`) |
 | `{{ args.* }}` | URL parameters the user arrived with (e.g. `args.utm_campaign`, `args.src`) |
-| `{{ value&#124;filter:arg }}` | Django template filters — e.g. `{{ user.highest_previous_contribution&#124;multiply:0.5 }}`, `{{ user.custom_fields.foo&#124;default:"0" }}` |
-| `{{ user&#124;actiontaken:PAGE_ID }}` | Returns `1` if the user has any prior action on the given page id, `0` otherwise. Native AK filter — works without custom-field setup. |
-| `{{ user&#124;tagged:"tag-name" }}` | Returns `1` if the user has taken action on any page carrying that tag, `0` otherwise. |
+| `{{ value\|filter:arg }}` | Django template filters — e.g. `{{ user.highest_previous_contribution\|multiply:0.5 }}`, `{{ user.custom_fields.foo\|default:"0" }}` |
+| `{{ user\|actiontaken:PAGE_ID }}` | Returns `1` if the user has any prior action on the given page id, `0` otherwise. Native AK filter — works without custom-field setup. |
+| `{{ user\|tagged:"tag-name" }}` | Returns `1` if the user has taken action on any page carrying that tag, `0` otherwise. |
 
 For the full filter list supported in your instance, see ActionKit's Custom Tags documentation.
 
@@ -163,7 +177,7 @@ Fragile — assumes the field exists and is a number:
 {% endif %}
 ```
 
-If `donation_count_2026` is missing on the user (not just empty — actually never set), the comparison can throw or evaluate in surprising ways.
+If `donation_count_2026` is missing or empty on the user, Django renders it as an empty string. An empty string isn't greater than 3, so this specific comparison routes the user to `{% else %}` — usually what you want. The pattern gets brittle when the field can hold a string like `"false"` or `"0"`, when you do arithmetic on the value before comparing, or when you invert the check (`{% if not user.custom_fields.foo %}` is true for missing-or-empty but also for the literal string `"0"` — and false for the literal string `"false"`, since Django treats any non-empty string as truthy). In those cases, coerce the value to a known type first.
 
 Defensive — option A, coerce missing values to `0`:
 

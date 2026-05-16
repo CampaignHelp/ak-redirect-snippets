@@ -156,6 +156,8 @@ https://yourorg.actionkit.com/donate/thanks/?utm_source=ak-redirect&utm_campaign
 {% endif %}
 ```
 
+A clean copy of the tagged snippet lives in `snippet-tagged.txt` next to this README.
+
 What to compare:
 
 - **Monthly conversion rate on the `upgrade-ask` branch.** New monthly donors divided by signers/actions sent to the upgrade page. Anything above 0.5% is meaningful traffic; above 1.5% is strong.
@@ -169,4 +171,4 @@ See the top-level `MEASUREMENT.md` for the branch-tagging convention used across
 
 ## Tested on
 
-Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22. Both branches pass via the automated Playwright matrix in `tests/` — one user with `is_monthly_donor="true"` routed to the else branch, one without the field (or with `"false"`) routed to the upgrade page.
+Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22, 2026-05-15, and 2026-05-16. Both branches pass via the automated Playwright matrix in `tests/` — one user with `is_monthly_donor="true"` routed to the else branch, one without the field (or with `"false"`) routed to the upgrade page.

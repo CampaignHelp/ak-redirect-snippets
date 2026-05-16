@@ -141,6 +141,8 @@ https://yourorg.actionkit.com/donate/thanks-and-donate/?utm_source=ak-redirect&u
 {% endif %}
 ```
 
+A clean copy of the tagged snippet lives in `snippet-tagged.txt` next to this README.
+
 What to compare:
 
 - **Bounce rate on the welcome page** (via Google Analytics if it's tagged). Welcome pages with too much ask or too little orientation bounce hard. Aim for bounce well below your site-wide average.
@@ -153,4 +155,4 @@ See the top-level `MEASUREMENT.md` for the branch-tagging convention used across
 
 ## Tested on
 
-Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22. Both branches pass via the automated Playwright matrix in `tests/`. When piloting this on your own instance, make sure the welcome URL actually resolves to a real page — AK silently falls back to a default thank-you URL if the rendered redirect points to a path that 404s on your subdomain.
+Tested on Robotic Dogs (`roboticdogs.actionkit.com`) on 2026-04-22, 2026-05-15, and 2026-05-16. Both branches pass via the automated Playwright matrix in `tests/`. When piloting this on your own instance, make sure the welcome URL actually resolves to a real page — AK silently falls back to a default thank-you URL if the rendered redirect points to a path that 404s on your subdomain.

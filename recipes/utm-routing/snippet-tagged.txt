@@ -1,0 +1,7 @@
+{% if args.src == "facebook" %}
+https://yourorg.actionkit.com/thanks/share-facebook/?utm_source=ak-redirect&utm_campaign=utm-routing&utm_content=facebook
+{% elif args.src == "email" %}
+https://yourorg.actionkit.com/donate/donate/?utm_source=ak-redirect&utm_campaign=utm-routing&utm_content=email
+{% else %}
+https://yourorg.actionkit.com/thanks/default/?utm_source=ak-redirect&utm_campaign=utm-routing&utm_content=untagged
+{% endif %}

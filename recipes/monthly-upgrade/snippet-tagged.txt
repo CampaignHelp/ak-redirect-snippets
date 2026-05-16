@@ -1,0 +1,5 @@
+{% if user.custom_fields.is_monthly_donor != "true" %}
+https://yourorg.actionkit.com/donate/go-monthly/?monthly_amounts=5,10,15,20,25,30&utm_source=ak-redirect&utm_campaign=monthly-upgrade&utm_content=upgrade-ask
+{% else %}
+https://yourorg.actionkit.com/donate/thanks/?utm_source=ak-redirect&utm_campaign=monthly-upgrade&utm_content=already-monthly
+{% endif %}

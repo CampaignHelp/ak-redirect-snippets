@@ -1,0 +1,5 @@
+{% if user|actiontaken:PRIOR_PAGE_ID %}
+https://yourorg.actionkit.com/donate/donate/?utm_source=ak-redirect&utm_campaign=escalation-ladder&utm_content=escalate-to-donate
+{% else %}
+https://yourorg.actionkit.com/call/call-your-rep/?utm_source=ak-redirect&utm_campaign=escalation-ladder&utm_content=escalate-to-call
+{% endif %}
