@@ -59,16 +59,143 @@ For the full filter list supported in your instance, see ActionKit's Custom Tags
 
 ## Reference
 
+- [`MEASUREMENT.md`](MEASUREMENT.md) — how to tell whether a redirect snippet is actually working: branch-tagging convention, what to compare, where to pull the data, and sample-size rules of thumb. Every recipe's README has a "How to know if it's working" section that follows this convention.
 - [`reference/donation-url-params.md`](reference/donation-url-params.md) — URL parameters AK Payments donation pages accept (`amounts=`, `weekly_amounts=`, `monthly_amounts=`, `annual_amounts=`). Pairs naturally with the donation-ladder recipe.
 
 ## Warnings
 
-- **Always provide a fallback.** Every conditional needs an `{% else %}` branch with a safe default URL. A missing redirect breaks the user's experience.
-- **Test by actually submitting.** AK evaluates the redirect URL template at action-submission time, and there's no preview for it — the only way to verify a branch fires is to submit the form as a user in that state. See step 6 in "How to use a recipe" above.
-- **Unresolvable paths silently fall back.** If the rendered redirect URL points to a path that 404s on your AK subdomain, AK quietly routes the user to the page's default thank-you URL instead. Make sure every URL a branch might produce actually exists before going live.
-- **Mind the quote escaping.** The Redirect URL field accepts the snippet as plain text — don't wrap it in extra quotes.
-- **Guard custom field references.** If a custom field is missing on some users, use `|default:"0"` or an explicit `{% if user.custom_fields.foo %}` check before comparing it.
-- **Some features are Payments-only.** The donation URL parameters (`amounts=`, etc.) only work on NGP VAN Payments-enabled donation pages.
+These are the failure modes you'll actually hit. Read them before publishing a snippet.
+
+### Always provide a fallback
+
+Every conditional needs an `{% else %}` branch with a safe default URL. If the `{% if %}` (and any `{% elif %}`) doesn't match and there's no `{% else %}`, AK renders the Redirect URL field as **empty** — the user falls through to the page's default thank-you URL, or in some edge cases gets a broken redirect.
+
+Wrong — no fallback:
+
+```django
+{% if user.custom_fields.donation_count_2026 > 3 %}
+https://yourorg.actionkit.com/upgrade/
+{% endif %}
+```
+
+Anyone who hasn't donated more than three times this year gets no redirect at all.
+
+Right — explicit fallback for everyone else:
+
+```django
+{% if user.custom_fields.donation_count_2026 > 3 %}
+https://yourorg.actionkit.com/upgrade/
+{% else %}
+https://yourorg.actionkit.com/thank-you/
+{% endif %}
+```
+
+The first branch fires for laddering candidates; everyone else lands on a generic thank-you. Nobody falls through.
+
+Rule of thumb: if you can imagine a user the `{% if %}` doesn't match, you need an `{% else %}` for them.
+
+### Test by actually submitting
+
+AK only evaluates the redirect URL at action-submission time. There is no preview button, no dry-run mode, no admin-side "what would this resolve to for user X" tool. The first time you'll see your branches fire is when a real user submits the form.
+
+What you have to do:
+
+- Create (or reuse) test accounts that exercise each branch — including the `{% else %}` fallback.
+- For each test account: log in, submit the page, watch the destination URL in your browser bar.
+- Confirm the destination URL is exactly what you expect, query parameters included.
+
+Example — for a snippet that branches on prior donation count, you need at least:
+
+- An account with `donation_count_2026 = 0` (fires the `{% else %}`)
+- An account with `donation_count_2026 = 5` (fires the `{% if %}`)
+
+If you only test the populated branch, you'll ship a snippet whose fallback is broken — and you won't find out until a never-donor submits the form.
+
+The `tests/` folder in this repo shows one way to automate this with Playwright against a test instance.
+
+### Unresolvable paths silently fall back
+
+If your rendered redirect URL points to a slug that doesn't exist on your AK subdomain, AK does not return a 404 — it quietly substitutes the page's own default thank-you URL. This is the most common reason a snippet "doesn't work" when the syntax is fine.
+
+```django
+{% if action.created_user %}
+https://yourorg.actionkit.com/welcome-new/      ← page doesn't exist
+{% else %}
+https://yourorg.actionkit.com/welcome-back/
+{% endif %}
+```
+
+A first-time user submits, the `{% if %}` fires, the rendered URL is `…/welcome-new/`, AK looks it up, can't find it, and sends them to the default thank-you. To the admin, it looks like the snippet didn't run. To the user, nothing seems wrong — they just landed somewhere different than you intended.
+
+How to catch it before going live:
+
+- Paste each possible rendered URL into a browser and confirm the page loads.
+- Walk every branch (not just the happy path) and check its destination exists.
+- Trailing slashes matter — `/welcome-back` and `/welcome-back/` are different URLs to AK.
+
+### Don't wrap the snippet in quotes
+
+The Redirect URL field takes the snippet as plain text. If you copy a snippet out of a code block somewhere, it's easy to accidentally include surrounding quotes — they will break the template.
+
+Wrong — surrounding quotes get treated as part of the URL:
+
+```
+"{% if user.custom_fields.donation_count_2026 > 3 %}https://yourorg.actionkit.com/upgrade/{% else %}https://yourorg.actionkit.com/thank-you/{% endif %}"
+```
+
+Right — no outer quotes; the template starts with `{%` and ends with `%}`:
+
+```
+{% if user.custom_fields.donation_count_2026 > 3 %}https://yourorg.actionkit.com/upgrade/{% else %}https://yourorg.actionkit.com/thank-you/{% endif %}
+```
+
+Common slip: copying from Slack, Google Docs, or email can introduce smart quotes (`"` `"` instead of `"`). If your snippet behaves weirdly, retype any quotes inside it from a plain-text editor.
+
+### Guard custom field references
+
+Custom user fields may be empty, missing, or zero for some users — especially newly created accounts or imported users. Comparing an empty field to a number is a common silent-failure pattern in AK templates.
+
+Fragile — assumes the field exists and is a number:
+
+```django
+{% if user.custom_fields.donation_count_2026 > 3 %}
+…
+{% endif %}
+```
+
+If `donation_count_2026` is missing on the user (not just empty — actually never set), the comparison can throw or evaluate in surprising ways.
+
+Defensive — option A, coerce missing values to `0`:
+
+```django
+{% if user.custom_fields.donation_count_2026|default:"0"|add:0 > 3 %}
+…
+{% endif %}
+```
+
+Defensive — option B, explicit existence check:
+
+```django
+{% if user.custom_fields.donation_count_2026 and user.custom_fields.donation_count_2026 > 3 %}
+…
+{% endif %}
+```
+
+The first clause short-circuits if the field is missing or empty, so the second clause never runs against a broken value.
+
+Either pattern is fine. Pick one and use it consistently across your snippets.
+
+### Some features are Payments-only
+
+The donation URL parameters (`amounts=`, `weekly_amounts=`, `monthly_amounts=`, `annual_amounts=`) only work on donation pages wired to NGP VAN **Payments**. They are silently ignored on legacy donation pages.
+
+How to tell which kind you have:
+
+- Open the donation page in the AK admin.
+- Payments-enabled pages show payment-method selectors and route through NGP's processor.
+- If you're not sure, ask your AK admin or NGP rep before relying on these parameters.
+
+Failure mode if you don't check: the parameters are appended to the URL, the user lands on the donation page, and the page shows its default ask amounts instead of yours. No error message — just no effect.
 
 ## Contributing
 
